@@ -15,7 +15,7 @@
   },
   "keywords": ["google-analytics", "ga4", "search-console", "google-ads", "gtm", "cli"],
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "dependencies": {
     "chalk": "^4.1.2",
     "cli-table3": "^0.6.5",

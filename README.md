@@ -97,4 +97,4 @@ All commands support `-f` / `--format`:
 
 ## License
 
-ISC
+Apache 2.0
