@@ -2,7 +2,7 @@
 
 A CLI for the Google Marketing Platform — GA4, Search Console, Google Ads, and Tag Manager.
 
-Built for AI agents and power users. Pipe JSON output to `jq`, feed it to Claude, or use it in shell scripts.
+Built for AI agents (Gemini CLI, Claude Code) and power users. Pipe JSON output to `jq`, feed it to your agent, or use it in shell scripts.
 
 ## Install
 
