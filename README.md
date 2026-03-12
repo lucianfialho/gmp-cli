@@ -157,6 +157,78 @@ gmp gsc inspect -u "https://example.com/page" -s "https://example.com/"
 gmp gsc sitemaps -s "https://example.com/"
 ```
 
+## Google Ads
+
+### List accessible accounts
+
+```bash
+# Simple list (no MCC needed)
+gmp ads accounts
+
+# Detailed list via MCC
+gmp ads accounts -c 1234567890 -f table
+```
+
+### Campaign performance
+
+```bash
+gmp ads campaigns -c 1234567890 -r LAST_30_DAYS -f table
+gmp ads campaigns -c 1234567890 --status ENABLED -f table
+```
+
+### Ad group performance
+
+```bash
+gmp ads adgroups -c 1234567890 -f table
+gmp ads adgroups -c 1234567890 --campaign "Brand" -f table
+```
+
+### Keyword performance
+
+```bash
+gmp ads keywords -c 1234567890 -f table
+gmp ads keywords -c 1234567890 --campaign "Brand" -l 20 -f table
+```
+
+### Search terms report
+
+```bash
+gmp ads search-terms -c 1234567890 -f table
+```
+
+### Raw GAQL query
+
+```bash
+gmp ads query -c 1234567890 -q "SELECT campaign.name, metrics.clicks FROM campaign WHERE segments.date DURING LAST_7_DAYS"
+```
+
+## Google Tag Manager
+
+### List accounts and containers
+
+```bash
+gmp gtm accounts
+gmp gtm containers -a ACCOUNT_ID
+```
+
+### List tags, triggers, and variables
+
+```bash
+# Uses default workspace automatically
+gmp gtm tags -p accounts/X/containers/Y -f table
+gmp gtm triggers -p accounts/X/containers/Y -f table
+gmp gtm variables -p accounts/X/containers/Y -f table
+
+# Specific workspace
+gmp gtm tags -p accounts/X/containers/Y -w 3 -f table
+```
+
+### List published versions
+
+```bash
+gmp gtm versions -p accounts/X/containers/Y -f table
+```
+
 ## Output Formats
 
 All commands support `-f` / `--format`:
@@ -169,10 +241,10 @@ All commands support `-f` / `--format`:
 
 ## Roadmap
 
-- [x] Google Analytics — `gmp ga` (v0.1)
-- [x] Google Search Console — `gmp gsc` (v0.2)
-- [ ] Google Ads — `gmp ads` (v0.4)
-- [ ] Google Tag Manager — `gmp gtm` (v0.3)
+- [x] Google Analytics — `gmp ga`
+- [x] Google Search Console — `gmp gsc`
+- [x] Google Ads — `gmp ads`
+- [x] Google Tag Manager — `gmp gtm`
 - [ ] `npm` global package
 - [ ] Default property/account config
 
