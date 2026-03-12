@@ -1,21 +1,49 @@
 {
   "name": "gmp-cli",
-  "version": "0.1.0",
-  "description": "Google Marketing Platform CLI — GA4, Search Console, Ads, GTM",
+  "version": "1.0.0",
+  "description": "Google Marketing Platform CLI — GA4, Search Console, Ads, GTM. Built for AI agents and power users.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
     "gmp": "dist/index.js"
   },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
+    "prepublishOnly": "npm run build",
     "test": "echo \"No tests yet\" && exit 0"
   },
-  "keywords": ["google-analytics", "ga4", "search-console", "google-ads", "gtm", "cli"],
-  "author": "",
+  "keywords": [
+    "google-analytics",
+    "ga4",
+    "search-console",
+    "google-ads",
+    "gtm",
+    "google-tag-manager",
+    "cli",
+    "google-marketing-platform",
+    "ai-agent",
+    "seo"
+  ],
+  "author": "Lucian Fialho",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lucianfialho/gmp-cli.git"
+  },
+  "homepage": "https://github.com/lucianfialho/gmp-cli",
+  "bugs": {
+    "url": "https://github.com/lucianfialho/gmp-cli/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "chalk": "^4.1.2",
     "cli-table3": "^0.6.5",
