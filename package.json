@@ -1,0 +1,30 @@
+{
+  "name": "gmp-cli",
+  "version": "0.1.0",
+  "description": "Google Marketing Platform CLI — GA4, Search Console, Ads, GTM",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "gmp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": ["google-analytics", "ga4", "search-console", "google-ads", "gtm", "cli"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.5",
+    "commander": "^14.0.3",
+    "googleapis": "^171.4.0",
+    "open": "^8.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.4.0",
+    "typescript": "^5.9.3"
+  }
+}
