@@ -1,5 +1,5 @@
 {
-  "name": "gmp-cli",
+  "name": "@lucianfialho/gmp-cli",
   "version": "1.0.0",
   "description": "Google Marketing Platform CLI — GA4, Search Console, Ads, GTM. Built for AI agents and power users.",
   "type": "module",
