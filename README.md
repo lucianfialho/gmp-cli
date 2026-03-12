@@ -23,6 +23,8 @@ npm link
 3. Enable the APIs you need:
    - **Google Analytics Data API**
    - **Google Analytics Admin API**
+   - **Search Console API** (for `gmp gsc`)
+   - **Google Ads API** (for `gmp ads`)
 4. Go to **APIs & Services > OAuth consent screen** and configure it:
    - User type: External (or Internal for Workspace)
    - Add your email as a test user
@@ -48,6 +50,24 @@ gmp auth logout
 ```
 
 Tokens are stored in `~/.config/gmp-cli/tokens.json` and auto-refresh.
+
+### Google Ads (extra setup)
+
+Google Ads API requires a **developer token** in addition to OAuth:
+
+1. Go to [ads.google.com/aw/apicenter](https://ads.google.com/aw/apicenter)
+2. Apply for API access and get your developer token
+3. Set it in the CLI:
+
+```bash
+gmp auth set-developer-token YOUR_DEVELOPER_TOKEN
+```
+
+If you use a Manager Account (MCC), set your login customer ID:
+
+```bash
+gmp auth set-login-customer-id 1234567890
+```
 
 ## Google Analytics (GA4)
 
@@ -95,6 +115,48 @@ gmp ga metadata -p 123456789 --type metrics -f table
 gmp ga check -p 123456789 -m sessions,bounceRate -d pagePath
 ```
 
+## Google Search Console
+
+### List verified sites
+
+```bash
+gmp gsc sites
+```
+
+### Search analytics report
+
+```bash
+# Top queries, last 28 days
+gmp gsc report -s "https://example.com/" -d query -l 10 -f table
+
+# Pages with most clicks
+gmp gsc report -s "https://example.com/" -d page -l 10 -f table
+
+# Queries by date
+gmp gsc report -s "https://example.com/" -d query,date -r 7d -f table
+
+# Filter by query
+gmp gsc report -s "https://example.com/" -d query --query "your keyword" -f table
+
+# Filter by page
+gmp gsc report -s "https://example.com/" -d query --page "/blog" -f table
+
+# Custom date range
+gmp gsc report -s "https://example.com/" -d query -r 2024-01-01..2024-01-31
+```
+
+### Check URL indexation
+
+```bash
+gmp gsc inspect -u "https://example.com/page" -s "https://example.com/"
+```
+
+### List sitemaps
+
+```bash
+gmp gsc sitemaps -s "https://example.com/"
+```
+
 ## Output Formats
 
 All commands support `-f` / `--format`:
@@ -107,10 +169,14 @@ All commands support `-f` / `--format`:
 
 ## Roadmap
 
-- [ ] Google Search Console (`gmp gsc`)
-- [ ] Google Tag Manager (`gmp gtm`)
-- [ ] Google Ads (`gmp ads`)
+- [x] Google Analytics — `gmp ga` (v0.1)
+- [x] Google Search Console — `gmp gsc` (v0.2)
+- [ ] Google Ads — `gmp ads` (v0.4)
+- [ ] Google Tag Manager — `gmp gtm` (v0.3)
 - [ ] `npm` global package
+- [ ] Default property/account config
+
+See [ROADMAP.md](ROADMAP.md) for the full plan.
 
 ## License
 

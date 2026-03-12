@@ -8,6 +8,7 @@ const SCOPES = [
   "https://www.googleapis.com/auth/analytics.readonly",
   "https://www.googleapis.com/auth/webmasters.readonly",
   "https://www.googleapis.com/auth/tagmanager.readonly",
+  "https://www.googleapis.com/auth/adwords",
 ];
 
 // Default OAuth client (users can override with their own)
@@ -149,6 +150,45 @@ export function setCredentials(clientId: string, clientSecret: string): void {
     JSON.stringify({ clientId, clientSecret }, null, 2)
   );
   console.log(`Credentials saved to ${credPath}`);
+}
+
+function getAdsConfigPath(): string {
+  return path.join(getConfigDir(), "ads.json");
+}
+
+interface AdsConfig {
+  developerToken?: string;
+  loginCustomerId?: string;
+}
+
+export function setDeveloperToken(token: string): void {
+  const configPath = getAdsConfigPath();
+  let config: AdsConfig = {};
+  if (fs.existsSync(configPath)) {
+    config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+  }
+  config.developerToken = token;
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+  console.log(`Developer token saved to ${configPath}`);
+}
+
+export function setLoginCustomerId(id: string): void {
+  const configPath = getAdsConfigPath();
+  let config: AdsConfig = {};
+  if (fs.existsSync(configPath)) {
+    config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+  }
+  config.loginCustomerId = id.replace(/-/g, "");
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+  console.log(`Login customer ID saved to ${configPath}`);
+}
+
+export function getAdsConfig(): AdsConfig {
+  const configPath = getAdsConfigPath();
+  if (fs.existsSync(configPath)) {
+    return JSON.parse(fs.readFileSync(configPath, "utf-8"));
+  }
+  return {};
 }
 
 export function status(): void {
