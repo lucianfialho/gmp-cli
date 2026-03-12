@@ -16,15 +16,32 @@ npm link
 
 ## Authentication
 
+### Setup (first time only)
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Create a project (or use an existing one)
+3. Enable the APIs you need:
+   - **Google Analytics Data API**
+   - **Google Analytics Admin API**
+4. Go to **APIs & Services > OAuth consent screen** and configure it:
+   - User type: External (or Internal for Workspace)
+   - Add your email as a test user
+5. Go to **APIs & Services > Credentials > Create Credentials > OAuth Client ID**
+   - Application type: **Desktop app**
+   - Add `http://localhost:3847/callback` to **Authorized redirect URIs**
+   - Copy the Client ID and Client Secret
+
+### Login
+
 ```bash
-# Browser-based OAuth (opens your default browser)
+# Set your OAuth credentials
+gmp auth set-credentials --client-id YOUR_ID --client-secret YOUR_SECRET
+
+# Login (opens your browser)
 gmp auth login
 
 # Check status
 gmp auth status
-
-# Use your own OAuth credentials (optional)
-gmp auth set-credentials --client-id YOUR_ID --client-secret YOUR_SECRET
 
 # Logout
 gmp auth logout
