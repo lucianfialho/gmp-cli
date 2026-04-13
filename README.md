@@ -1,6 +1,6 @@
 # gmp-cli
 
-A CLI for the Google Marketing Platform — GA4, Search Console, Google Ads, and Tag Manager.
+A CLI for the Google Marketing Platform — GA4, Search Console, Google Ads, Tag Manager, and BigQuery.
 
 Built for AI agents (Gemini CLI, Claude Code) and power users. Pipe JSON output to `jq`, feed it to your agent, or use it in shell scripts.
 
@@ -233,6 +233,76 @@ gmp gtm tags -p accounts/X/containers/Y -w 3 -f table
 gmp gtm versions -p accounts/X/containers/Y -f table
 ```
 
+## BigQuery (GMP Export Data)
+
+Query GA4, Google Ads, and GSC data exported to BigQuery using pre-built templates or custom SQL.
+
+> **Note:** Requires re-running `gmp auth login` to grant the `bigquery.readonly` scope.
+
+### List available templates
+
+```bash
+gmp bq templates -f table
+gmp bq templates --service ga4
+gmp bq templates --service ads
+gmp bq templates --service gsc
+```
+
+### Run a template
+
+```bash
+# GA4: Flatten nested event_params
+gmp bq query -t ga4-events-flat --project my-project --dataset analytics_123456789 -r 30d
+
+# GA4: Funnel analysis
+gmp bq query -t ga4-funnel --project my-project --dataset analytics_123456789 -r 90d -f table
+
+# GA4: Multi-touch attribution
+gmp bq query -t ga4-attribution --project my-project --dataset analytics_123456789 -r 2024-01-01..2024-03-31
+
+# Ads: Wasted spend (search terms with zero conversions)
+gmp bq query -t ads-wasted-spend --project my-project --dataset my_ads_data -r 30d -f table
+
+# GSC: Top pages by clicks
+gmp bq query -t gsc-top-pages --project my-project --dataset searchconsole -r 90d -f table
+
+# GSC: Keyword cannibalization detection
+gmp bq query -t gsc-cannibalization --project my-project --dataset searchconsole -r 90d -f table
+```
+
+### Explore a dataset
+
+```bash
+# List tables
+gmp bq explore --project my-project --dataset analytics_123456789
+
+# Show schema for a specific table
+gmp bq explore --project my-project --dataset analytics_123456789 --table events_20240101
+```
+
+### Run custom SQL
+
+```bash
+gmp bq custom --project my-project -q "SELECT event_date, COUNT(*) as events FROM \`my-project.analytics_123456789.events_20240101\` GROUP BY event_date"
+```
+
+### Available Templates
+
+| Template | Service | Description |
+|----------|---------|-------------|
+| `ga4-events-flat` | GA4 | Flatten nested `event_params` into columns |
+| `ga4-funnel` | GA4 | Funnel analysis from event sequences |
+| `ga4-attribution` | GA4 | Multi-touch attribution (source/medium) |
+| `ga4-user-journey` | GA4 | Session-level page paths |
+| `ga4-ecommerce` | GA4 | Purchase/revenue with product detail |
+| `ga4-retention` | GA4 | Weekly cohort retention |
+| `ads-wasted-spend` | Ads | Search terms with spend, zero conversions |
+| `ads-quality-trend` | Ads | Keyword quality score over time |
+| `ads-cross-campaign` | Ads | Cross-campaign performance comparison |
+| `gsc-top-pages` | GSC | Top pages by clicks with CTR/position |
+| `gsc-query-clusters` | GSC | Top queries by volume |
+| `gsc-cannibalization` | GSC | Queries with multiple competing pages |
+
 ## Output Formats
 
 All commands support `-f` / `--format`:
@@ -250,6 +320,7 @@ All commands support `-f` / `--format`:
 - [x] **Google Ads** — accounts, campaigns, ad groups, keywords, search terms, raw GAQL
 - [x] **Google Tag Manager** — accounts, containers, tags, triggers, variables, versions
 - [x] **3 output formats** — JSON (pipe to `jq` or AI agents), table, CSV
+- [x] **BigQuery** — query GMP export data with 12 pre-built templates
 - [x] **AI agent skills** — OpenClaw-compatible skills for all services
 
 See [ROADMAP.md](ROADMAP.md) for what's next.
