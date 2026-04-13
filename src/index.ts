@@ -13,7 +13,7 @@ const program = new Command();
 program
   .name("gmp")
   .description("Google Marketing Platform CLI — GA4, Search Console, Ads, GTM")
-  .version("1.1.0");
+  .version("1.2.0");
 
 registerAuthCommand(program);
 registerGaCommand(program);
