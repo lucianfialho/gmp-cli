@@ -7,11 +7,15 @@ Built for AI agents (Gemini CLI, Claude Code) and power users. Pipe JSON output 
 ## Install
 
 ```bash
+npm install -g @lucianfialho/gmp-cli
+```
+
+Or from source:
+
+```bash
 git clone https://github.com/lucianfialho/gmp-cli.git
 cd gmp-cli
-npm install
-npm run build
-npm link
+npm install && npm run build && npm link
 ```
 
 ## Authentication
@@ -239,16 +243,16 @@ All commands support `-f` / `--format`:
 | `table` | Human-readable table |
 | `csv` | CSV — pipe to file or other tools |
 
-## Roadmap
+## What's included
 
-- [x] Google Analytics — `gmp ga`
-- [x] Google Search Console — `gmp gsc`
-- [x] Google Ads — `gmp ads`
-- [x] Google Tag Manager — `gmp gtm`
-- [ ] `npm` global package
-- [ ] Default property/account config
+- [x] **Google Analytics (GA4)** — accounts, properties, reports, realtime, metadata
+- [x] **Google Search Console** — sites, search analytics, URL inspection, sitemaps
+- [x] **Google Ads** — accounts, campaigns, ad groups, keywords, search terms, raw GAQL
+- [x] **Google Tag Manager** — accounts, containers, tags, triggers, variables, versions
+- [x] **3 output formats** — JSON (pipe to `jq` or AI agents), table, CSV
+- [x] **AI agent skills** — OpenClaw-compatible skills for all services
 
-See [ROADMAP.md](ROADMAP.md) for the full plan.
+See [ROADMAP.md](ROADMAP.md) for what's next.
 
 ## License
 
