@@ -13,47 +13,56 @@
 - [x] Output formats: json, table, csv
 - [x] OpenClaw-compatible agent skills (11 skills)
 
-## v0.2 — Google Search Console
+## v0.2 — Google Search Console ✅
 
-- [ ] `gmp gsc sites` — list verified sites
-- [ ] `gmp gsc report` — search analytics (clicks, impressions, CTR, position)
-- [ ] `gmp gsc inspect` — check URL indexation status
-- [ ] `gmp gsc sitemaps` — list and check sitemaps
-- [ ] Skills: recipe-keyword-performance, recipe-indexation-check, persona-seo-specialist update
+- [x] `gmp gsc sites` — list verified sites
+- [x] `gmp gsc report` — search analytics (clicks, impressions, CTR, position)
+- [x] `gmp gsc inspect` — check URL indexation status
+- [x] `gmp gsc sitemaps` — list and check sitemaps
+- [x] Skills: recipe-keyword-performance, recipe-indexation-check, persona-seo-specialist update
 
-## v0.3 — Google Tag Manager
+## v0.3 — Google Tag Manager ✅
 
-- [ ] `gmp gtm accounts` — list GTM accounts
-- [ ] `gmp gtm containers` — list containers
-- [ ] `gmp gtm tags` — list tags in a container
-- [ ] `gmp gtm triggers` — list triggers
-- [ ] `gmp gtm variables` — list variables
-- [ ] `gmp gtm versions` — list published versions
-- [ ] Skills: recipe-tag-audit, recipe-container-export
+- [x] `gmp gtm accounts` — list GTM accounts
+- [x] `gmp gtm containers` — list containers
+- [x] `gmp gtm tags` — list tags in a container
+- [x] `gmp gtm triggers` — list triggers
+- [x] `gmp gtm variables` — list variables
+- [x] `gmp gtm versions` — list published versions
+- [x] Skills: recipe-tag-audit, recipe-container-export
 
-## v0.4 — Google Ads
+## v0.4 — Google Ads ✅
 
-- [ ] `gmp ads accounts` — list accessible accounts
-- [ ] `gmp ads campaigns` — campaign performance (clicks, impressions, cost, conversions)
-- [ ] `gmp ads adgroups` — ad group performance
-- [ ] `gmp ads keywords` — keyword performance
-- [ ] `gmp ads search-terms` — actual search terms that triggered ads
-- [ ] Skills: recipe-campaign-performance, recipe-wasted-spend
+- [x] `gmp ads accounts` — list accessible accounts
+- [x] `gmp ads campaigns` — campaign performance (clicks, impressions, cost, conversions)
+- [x] `gmp ads adgroups` — ad group performance
+- [x] `gmp ads keywords` — keyword performance
+- [x] `gmp ads search-terms` — actual search terms that triggered ads
+- [x] Skills: recipe-campaign-performance, recipe-wasted-spend
 
-## v0.5 — Polish & npm
+## v1.0 — Published to npm ✅
 
-- [ ] Publish to npm (`npm install -g gmp-cli`)
+- [x] Publish to npm (`npm install -g @lucianfialho/gmp-cli`)
+- [x] All 4 GMP APIs integrated (GA4, GSC, GTM, Ads)
+- [x] 3 output formats (JSON, table, CSV)
+- [x] OpenClaw skills for all services
+
+## v1.1 — Next (in progress)
+
 - [ ] Embed default OAuth client_id (no setup needed)
 - [ ] `gmp config set property <id>` — set default property
 - [ ] `gmp config set account <id>` — set default account
+- [ ] Migrate GSC from deprecated webmasters v3 to searchconsole v1 ([#3](https://github.com/lucianfialho/gmp-cli/issues/3))
+- [ ] GA4 Admin API v1alpha — channel groups ([#1](https://github.com/lucianfialho/gmp-cli/issues/1))
+- [ ] GA4 Data API v1alpha — funnel reports ([#2](https://github.com/lucianfialho/gmp-cli/issues/2))
 - [ ] Auto-pagination for large result sets
 - [ ] `--sort` and `--order` flags for reports
-- [ ] `--compare` flag for period-over-period in a single command
+- [ ] `--compare` flag for period-over-period
 
-## v1.0 — Cross-service Workflows
+## v2.0 — Cross-service Workflows
 
 - [ ] `gmp dashboard` — unified overview (GA + GSC + Ads)
 - [ ] Cross-API recipes (organic keywords → landing page performance)
 - [ ] `gmp export` — scheduled report export
+- [ ] GA4 Admin v1alpha — audiences, permissions, linking ([#4](https://github.com/lucianfialho/gmp-cli/issues/4))
 - [ ] Advanced personas (CRO analyst, paid media manager)
-- [ ] ClawHub registry submission

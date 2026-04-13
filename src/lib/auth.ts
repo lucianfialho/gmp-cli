@@ -9,6 +9,7 @@ const SCOPES = [
   "https://www.googleapis.com/auth/webmasters.readonly",
   "https://www.googleapis.com/auth/tagmanager.readonly",
   "https://www.googleapis.com/auth/adwords",
+  "https://www.googleapis.com/auth/bigquery.readonly",
 ];
 
 // Default OAuth client (users can override with their own)
