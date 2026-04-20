@@ -75,28 +75,54 @@ Get the account ID from `gmp gtm accounts` and container ID from `gmp gtm contai
 
 ## Output Columns
 
-### Tags
+Table and CSV output is simplified. **JSON output includes full API fields** — use `-f json` for audits and automation.
+
+### Tags (`-f table`)
 | Column | Description |
 |--------|-------------|
 | `tagId` | Tag ID |
 | `name` | Tag name |
-| `type` | Tag type (e.g. `ua`, `awct`, `html`) |
+| `type` | Tag type (e.g. `ua`, `awct`, `html`, `gaawe`) |
 | `firingTriggerId` | Comma-separated trigger IDs |
 | `paused` | Whether the tag is paused |
 
-### Triggers
+### Tags (`-f json` — additional fields)
+| Field | Description |
+|-------|-------------|
+| `parameter` | Full parameter array (measurementId, eventName, eventParameters, etc.) |
+| `blockingTriggerId` | Array of blocking trigger IDs |
+| `fingerprint` | Tag fingerprint |
+| `path` | Full resource path |
+
+### Triggers (`-f table`)
 | Column | Description |
 |--------|-------------|
 | `triggerId` | Trigger ID |
 | `name` | Trigger name |
 | `type` | Trigger type (e.g. `pageview`, `click`, `customEvent`) |
 
-### Variables
+### Triggers (`-f json` — additional fields)
+| Field | Description |
+|-------|-------------|
+| `filter` | Trigger condition filters |
+| `autoEventFilter` | Auto-event filters |
+| `parameter` | Trigger parameter array |
+| `fingerprint` | Trigger fingerprint |
+| `path` | Full resource path |
+
+### Variables (`-f table`)
 | Column | Description |
 |--------|-------------|
 | `variableId` | Variable ID |
 | `name` | Variable name |
 | `type` | Variable type (e.g. `v`, `jsm`, `gas`) |
+
+### Variables (`-f json` — additional fields)
+| Field | Description |
+|-------|-------------|
+| `parameter` | Variable parameter array |
+| `fingerprint` | Variable fingerprint |
+| `path` | Full resource path |
 
 ## Tips
 
@@ -104,3 +130,11 @@ Get the account ID from `gmp gtm accounts` and container ID from `gmp gtm contai
 - Tags, triggers, and variables are workspace-scoped. Use `-w 0` for the default workspace.
 - Use `gmp gtm versions` to see publish history and compare tag/trigger/variable counts across versions.
 - Pipe to `jq` for analysis: `gmp gtm tags ... -f json | jq '[.[] | select(.type == "html")]'`
+- **Unused variable audit:** extract all `{{VarName}}` references from `parameter[].value` across tags, triggers, and variables, then diff against the variables list.
+
+```bash
+# Find all variable references used in tags
+gmp gtm tags -p accounts/X/containers/Y -f json \
+  | jq -r '[.[].parameter[]? | .. | strings | scan("\\{\\{([^}]+)\\}\\}")][] ' \
+  | sort -u
+```

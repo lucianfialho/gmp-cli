@@ -227,6 +227,15 @@ gmp gtm variables -p accounts/X/containers/Y -f table
 gmp gtm tags -p accounts/X/containers/Y -w 3 -f table
 ```
 
+JSON output includes the full API payload — `parameter[]`, `filter[]`, `fingerprint`, `path`, and `blockingTriggerId[]`. Use `-f json` for audits and automation:
+
+```bash
+# Find all variable references used inside tag parameters (unused variable audit)
+gmp gtm tags -p accounts/X/containers/Y -f json \
+  | jq -r '[.[].parameter[]? | .. | strings | scan("\\{\\{([^}]+)\\}\\}")][]' \
+  | sort -u
+```
+
 ### List published versions
 
 ```bash

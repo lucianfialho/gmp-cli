@@ -103,13 +103,24 @@ export function registerGtmCommand(program: Command): void {
           parent,
         });
 
-        const tags = (response.data.tag || []).map((t: Tag) => ({
-          tagId: t.tagId || "",
-          name: t.name || "",
-          type: t.type || "",
-          firingTriggerId: (t.firingTriggerId || []).join(", "),
-          paused: String(t.paused ?? false),
-        }));
+        const isJson = (opts.format as OutputFormat) === "json";
+        const tags = (response.data.tag || []).map((t: Tag) => {
+          const base = {
+            tagId: t.tagId || "",
+            name: t.name || "",
+            type: t.type || "",
+            firingTriggerId: (t.firingTriggerId || []).join(", "),
+            paused: String(t.paused ?? false),
+          };
+          if (!isJson) return base;
+          return {
+            ...base,
+            blockingTriggerId: t.blockingTriggerId || [],
+            fingerprint: t.fingerprint || "",
+            path: t.path || "",
+            parameter: t.parameter || [],
+          };
+        });
 
         console.log(
           formatOutput(tags, opts.format as OutputFormat, [
@@ -145,11 +156,23 @@ export function registerGtmCommand(program: Command): void {
           parent,
         });
 
-        const triggers = (response.data.trigger || []).map((t: Trigger) => ({
-          triggerId: t.triggerId || "",
-          name: t.name || "",
-          type: t.type || "",
-        }));
+        const isJson = (opts.format as OutputFormat) === "json";
+        const triggers = (response.data.trigger || []).map((t: Trigger) => {
+          const base = {
+            triggerId: t.triggerId || "",
+            name: t.name || "",
+            type: t.type || "",
+          };
+          if (!isJson) return base;
+          return {
+            ...base,
+            fingerprint: t.fingerprint || "",
+            path: t.path || "",
+            filter: t.filter || [],
+            autoEventFilter: t.autoEventFilter || [],
+            parameter: t.parameter || [],
+          };
+        });
 
         console.log(
           formatOutput(triggers, opts.format as OutputFormat, [
@@ -183,11 +206,21 @@ export function registerGtmCommand(program: Command): void {
           parent,
         });
 
-        const variables = (response.data.variable || []).map((v: Variable) => ({
-          variableId: v.variableId || "",
-          name: v.name || "",
-          type: v.type || "",
-        }));
+        const isJson = (opts.format as OutputFormat) === "json";
+        const variables = (response.data.variable || []).map((v: Variable) => {
+          const base = {
+            variableId: v.variableId || "",
+            name: v.name || "",
+            type: v.type || "",
+          };
+          if (!isJson) return base;
+          return {
+            ...base,
+            fingerprint: v.fingerprint || "",
+            path: v.path || "",
+            parameter: v.parameter || [],
+          };
+        });
 
         console.log(
           formatOutput(variables, opts.format as OutputFormat, [
