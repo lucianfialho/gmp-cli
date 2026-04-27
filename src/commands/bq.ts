@@ -7,6 +7,26 @@ import {
   getTemplate,
   renderTemplate,
 } from "../lib/bq-templates.js";
+import { filterPii } from "@lucianfialho/pii-filter";
+
+const GA4_PII_FIELDS = [
+  "user_pseudo_id",
+  "user_id",
+  "user_ltv",
+  "event_params.email",
+  "event_params.phone",
+  "event_params.address",
+  "user_properties.email",
+  "user_properties.phone",
+];
+
+function applyPrivacyFilter(rows: Record<string, string>[]): Record<string, string>[] {
+  const salt = process.env.GMP_PII_SALT;
+  const options = salt
+    ? { mode: "pseudonymize" as const, salt, knownPiiFields: GA4_PII_FIELDS }
+    : { mode: "redact" as const, knownPiiFields: GA4_PII_FIELDS };
+  return rows.map((row) => filterPii(row, options) as Record<string, string>);
+}
 
 function parseDateForBq(input: string): string {
   if (input === "today") {
@@ -86,6 +106,7 @@ export function registerBqCommand(program: Command): void {
       "30d"
     )
     .option("-f, --format <fmt>", "Output format: json, table, csv", "json")
+    .option("--privacy-filter", "Mask PII before output (set GMP_PII_SALT for pseudonymization)")
     .action(async (opts) => {
       try {
         const tpl = getTemplate(opts.template);
@@ -122,13 +143,15 @@ export function registerBqCommand(program: Command): void {
         const fields = (response.data.schema?.fields || []).map(
           (f) => f.name || ""
         );
-        const rows = (response.data.rows || []).map((row) => {
+        let rows = (response.data.rows || []).map((row) => {
           const obj: Record<string, string> = {};
           (row.f || []).forEach((cell, i) => {
             obj[fields[i]!] = String(cell.v ?? "");
           });
           return obj;
         });
+
+        if (opts.privacyFilter) rows = applyPrivacyFilter(rows);
 
         console.log(formatOutput(rows, opts.format as OutputFormat, fields));
 
@@ -212,6 +235,7 @@ export function registerBqCommand(program: Command): void {
     .requiredOption("--project <id>", "GCP project ID")
     .requiredOption("-q, --query <sql>", "SQL query to execute")
     .option("-f, --format <fmt>", "Output format: json, table, csv", "json")
+    .option("--privacy-filter", "Mask PII before output (set GMP_PII_SALT for pseudonymization)")
     .action(async (opts) => {
       try {
         const auth = getAuthClient();
@@ -229,13 +253,15 @@ export function registerBqCommand(program: Command): void {
         const fields = (response.data.schema?.fields || []).map(
           (f) => f.name || ""
         );
-        const rows = (response.data.rows || []).map((row) => {
+        let rows = (response.data.rows || []).map((row) => {
           const obj: Record<string, string> = {};
           (row.f || []).forEach((cell, i) => {
             obj[fields[i]!] = String(cell.v ?? "");
           });
           return obj;
         });
+
+        if (opts.privacyFilter) rows = applyPrivacyFilter(rows);
 
         console.log(formatOutput(rows, opts.format as OutputFormat, fields));
 
