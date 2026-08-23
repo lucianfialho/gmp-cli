@@ -47,6 +47,16 @@
 - [x] 3 output formats (JSON, table, CSV)
 - [x] OpenClaw skills for all services
 
+## v1.6 — YouTube (proposed)
+
+- [x] `gmp yt channel` — subscribers, total views, video count
+- [x] `gmp yt videos` — channel uploads with views, likes, comments
+- [x] `gmp yt video` — stats for one or more video IDs
+- [x] `gmp yt search` — public video search
+- [x] API key auth (`YOUTUBE_API_KEY`) with OAuth fallback
+- [x] Skills: gmp-yt, gmp-yt-videos
+- [ ] YouTube Analytics API — watch time, retention, impression CTR, traffic sources
+
 ## v1.1 — Next (in progress)
 
 - [ ] Embed default OAuth client_id (no setup needed)

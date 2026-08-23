@@ -9,12 +9,13 @@ import { registerGtmCommand } from "./commands/gtm.js";
 import { registerBqCommand } from "./commands/bq.js";
 import { registerPsiCommand } from "./commands/psi.js";
 import { registerMcCommand } from "./commands/mc.js";
+import { registerYtCommand } from "./commands/yt.js";
 
 const program = new Command();
 
 program
   .name("gmp")
-  .description("Google Marketing Platform CLI — GA4, Search Console, Ads, GTM, Merchant Center")
+  .description("Google Marketing Platform CLI — GA4, Search Console, Ads, GTM, Merchant Center, YouTube")
   .version("1.5.0");
 
 registerAuthCommand(program);
@@ -25,5 +26,6 @@ registerGtmCommand(program);
 registerBqCommand(program);
 registerPsiCommand(program);
 registerMcCommand(program);
+registerYtCommand(program);
 
 program.parse();

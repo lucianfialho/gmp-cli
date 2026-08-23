@@ -10,6 +10,7 @@ export const SCOPES = [
   "https://www.googleapis.com/auth/adwords",
   "https://www.googleapis.com/auth/bigquery.readonly",
   "https://www.googleapis.com/auth/content",
+  "https://www.googleapis.com/auth/youtube.readonly",
 ];
 
 // Default OAuth client (users can override with their own)

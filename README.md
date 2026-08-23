@@ -1,6 +1,6 @@
 # gmp-cli
 
-A CLI for the Google Marketing Platform — GA4, Search Console, Google Ads, Tag Manager, and BigQuery.
+A CLI for the Google Marketing Platform — GA4, Search Console, Google Ads, Tag Manager, BigQuery, and YouTube.
 
 Built for AI agents (Gemini CLI, Claude Code) and power users. Pipe JSON output to `jq`, feed it to your agent, or use it in shell scripts.
 
@@ -38,6 +38,7 @@ gmp --help
    - **Google Analytics Admin API**
    - **Search Console API** (for `gmp gsc`)
    - **Google Ads API** (for `gmp ads`)
+   - **YouTube Data API v3** (for `gmp yt`)
 4. Go to **APIs & Services > OAuth consent screen** and configure it:
    - User type: External (or Internal for Workspace)
    - Add your email as a test user
@@ -399,6 +400,89 @@ The products summary includes `availability`, `price`, `gtin`, `disapproved`,
 feed without any extra API calls. The `--out` JSON keeps the complete
 `productAttributes` + `productStatus.itemLevelIssues` for deeper analysis.
 
+## YouTube
+
+Public channel and video stats from the YouTube Data API v3.
+
+### Credentials
+
+`gmp yt` works with either an **API key** or your existing OAuth login. The API key is recommended: these stats are public data, and a key never expires.
+
+```bash
+# Enable "YouTube Data API v3" in your Google Cloud project, then
+# create an API key under APIs & Services > Credentials
+export YOUTUBE_API_KEY=AIza...
+
+# Optional: default channel, so -c can be omitted
+export YOUTUBE_CHANNEL_ID=@yourhandle
+```
+
+Without `YOUTUBE_API_KEY`, the CLI falls back to your `gmp auth login` token, which carries the `youtube.readonly` scope. In that mode, omitting `--channel` resolves to your own channel.
+
+### Channel overview
+
+```bash
+gmp yt channel -c @mkbhd
+gmp yt channel -c UCBJycsmduvYEL83R_U4JriQ -f json
+```
+
+Returns subscribers, total views, video count and the uploads playlist ID.
+
+### List videos
+
+```bash
+# 25 most recent uploads
+gmp yt videos -c @mkbhd
+
+# 100 most recent, sorted by views
+gmp yt videos -c @mkbhd -n 100 -s views
+
+# Export to CSV
+gmp yt videos -c @mkbhd -n 200 -f csv > videos.csv
+
+# Videos above 10k views
+gmp yt videos -c @mkbhd -n 100 -f json | jq '[.[] | select(.views > 10000)]'
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-c, --channel <ref>` | `$YOUTUBE_CHANNEL_ID` | Channel ID (`UC...`) or `@handle` |
+| `-n, --limit <n>` | `25` | How many videos to fetch, most recent first |
+| `-s, --sort <field>` | `date` | Sort the fetched window: date, views, likes, comments |
+
+`--sort` orders the videos it fetched, not the whole channel. To rank a full catalog, raise `-n` past the channel's video count.
+
+### Single video
+
+```bash
+gmp yt video -i dQw4w9WgXcQ
+gmp yt video -i dQw4w9WgXcQ,9bZkp7q19f0 -f table
+```
+
+### Search
+
+```bash
+gmp yt search -q "product analytics" -n 20
+gmp yt search -q "tutorial" -c UCBJycsmduvYEL83R_U4JriQ -o viewCount
+```
+
+### Quota
+
+The Data API allows 10,000 units per day by default.
+
+| Command | Cost |
+|---------|------|
+| `yt channel` | 1 unit |
+| `yt videos` | ~2 units per 50 videos |
+| `yt video` | 1 unit per 50 IDs |
+| `yt search` | 101 units |
+
+`yt videos` walks the uploads playlist instead of calling `search.list`, which is why listing a whole channel stays cheap.
+
+### Scope
+
+This covers public metrics only. Watch time, audience retention, impression CTR and traffic sources come from the YouTube Analytics API, a separate API that is not implemented yet.
+
 ## Output Formats
 
 All commands support `-f` / `--format`:
@@ -419,6 +503,7 @@ All commands support `-f` / `--format`:
 - [x] **BigQuery** — query GMP export data with 12 pre-built templates
 - [x] **PageSpeed Insights** — Lighthouse scores, Core Web Vitals, and CrUX field data
 - [x] **Merchant Center** — accounts, product catalog with item-level issues, account issues (Merchant API v1)
+- [x] **YouTube** — channel stats, video performance, public search (Data API v3)
 - [x] **AI agent skills** — OpenClaw-compatible skills for all services
 
 See [ROADMAP.md](ROADMAP.md) for what's next.

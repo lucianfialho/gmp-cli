@@ -57,6 +57,17 @@ gmp auth set-developer-token YOUR_TOKEN
 gmp auth set-login-customer-id 1234567890
 ```
 
+### YouTube (alternative auth)
+
+`gmp yt` reads public data and accepts an API key instead of OAuth:
+
+```bash
+export YOUTUBE_API_KEY=AIza...       # APIs & Services > Credentials
+export YOUTUBE_CHANNEL_ID=@handle    # optional default channel
+```
+
+Without the key it falls back to the OAuth token (scope `youtube.readonly`).
+
 ## Global Flags
 
 | Flag | Description |
@@ -75,4 +86,5 @@ gmp auth set-login-customer-id 1234567890
 
 - **Never** output OAuth tokens or credentials directly
 - Tokens are stored locally at `~/.config/gmp-cli/`
-- All API calls are read-only (analytics.readonly, webmasters.readonly, tagmanager.readonly, adwords)
+- All API calls are read-only (analytics.readonly, webmasters.readonly, tagmanager.readonly, adwords, youtube.readonly)
+- **Never** echo `YOUTUBE_API_KEY` in output or logs
