@@ -59,12 +59,13 @@ export function registerGtmCommand(program: Command): void {
           parent: `accounts/${opts.account}`,
         });
 
+        const isContainersJson = (opts.format as OutputFormat) === "json";
         const containers = (response.data.container || []).map((c: Container) => ({
           containerId: c.containerId || "",
           name: c.name || "",
           publicId: c.publicId || "",
-          usageContext: (c.usageContext || []).join(", "),
-          domainName: (c.domainName || []).join(", "),
+          usageContext: isContainersJson ? (c.usageContext || []) : (c.usageContext || []).join(", "),
+          domainName: isContainersJson ? (c.domainName || []) : (c.domainName || []).join(", "),
           path: c.path || "",
         }));
 
@@ -109,7 +110,7 @@ export function registerGtmCommand(program: Command): void {
             tagId: t.tagId || "",
             name: t.name || "",
             type: t.type || "",
-            firingTriggerId: (t.firingTriggerId || []).join(", "),
+            firingTriggerId: isJson ? (t.firingTriggerId || []) : (t.firingTriggerId || []).join(", "),
             paused: String(t.paused ?? false),
           };
           if (!isJson) return base;
