@@ -6,6 +6,7 @@ import { registerAccountsCommand } from "./accounts.js";
 import { registerPropertiesCommand } from "./properties.js";
 import { registerCheckCommand } from "./check.js";
 import { registerFunnelCommand } from "./funnel.js";
+import { registerChannelGroupsCommand } from "./channel-groups/index.js";
 
 export function registerGaCommand(program: Command): void {
   const ga = program
@@ -19,4 +20,5 @@ export function registerGaCommand(program: Command): void {
   registerPropertiesCommand(ga);
   registerCheckCommand(ga);
   registerFunnelCommand(ga);
+  registerChannelGroupsCommand(ga);
 }

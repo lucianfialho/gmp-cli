@@ -63,7 +63,7 @@
 - [ ] `gmp config set property <id>` — set default property
 - [ ] `gmp config set account <id>` — set default account
 - [x] Migrate GSC from deprecated webmasters v3 to searchconsole v1 ([#3](https://github.com/lucianfialho/gmp-cli/issues/3))
-- [ ] GA4 Admin API v1alpha — channel groups ([#1](https://github.com/lucianfialho/gmp-cli/issues/1))
+- [x] GA4 Admin API v1alpha — channel groups ([#1](https://github.com/lucianfialho/gmp-cli/issues/1)) — `gmp ga channel-groups list/get/create/update/delete`; streams list/get and other v1alpha endpoints from #1 still open
 - [x] GA4 Data API v1alpha — funnel reports ([#2](https://github.com/lucianfialho/gmp-cli/issues/2)) — `gmp ga funnel`; audience-list/report-task still open
 - [ ] Auto-pagination for large result sets
 - [ ] `--sort` and `--order` flags for reports
