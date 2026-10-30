@@ -3,7 +3,7 @@
 import { Command } from "commander";
 import { registerAuthCommand } from "./commands/auth.js";
 import { registerGaCommand } from "./commands/ga.js";
-import { registerGscCommand } from "./commands/gsc.js";
+import { registerGscCommand } from "./commands/gsc/index.js";
 import { registerAdsCommand } from "./commands/ads.js";
 import { registerGtmCommand } from "./commands/gtm.js";
 import { registerBqCommand } from "./commands/bq.js";

@@ -62,7 +62,7 @@
 - [ ] Embed default OAuth client_id (no setup needed)
 - [ ] `gmp config set property <id>` — set default property
 - [ ] `gmp config set account <id>` — set default account
-- [ ] Migrate GSC from deprecated webmasters v3 to searchconsole v1 ([#3](https://github.com/lucianfialho/gmp-cli/issues/3))
+- [x] Migrate GSC from deprecated webmasters v3 to searchconsole v1 ([#3](https://github.com/lucianfialho/gmp-cli/issues/3))
 - [ ] GA4 Admin API v1alpha — channel groups ([#1](https://github.com/lucianfialho/gmp-cli/issues/1))
 - [ ] GA4 Data API v1alpha — funnel reports ([#2](https://github.com/lucianfialho/gmp-cli/issues/2))
 - [ ] Auto-pagination for large result sets
