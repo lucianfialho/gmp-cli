@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { google } from "googleapis";
 import { getAuthClient } from "../../lib/auth.js";
 import { formatOutput, type OutputFormat } from "../../lib/format.js";
+import { paginateAll } from "../../lib/paginate.js";
 
 export function registerAccountsCommand(ga: Command): void {
   ga.command("accounts")
@@ -12,8 +13,11 @@ export function registerAccountsCommand(ga: Command): void {
         const auth = getAuthClient();
         const admin = google.analyticsadmin({ version: "v1beta", auth });
 
-        const response = await admin.accounts.list();
-        const accounts = (response.data.accounts || []).map((a) => ({
+        const allAccounts = await paginateAll(async (pageToken) => {
+          const response = await admin.accounts.list({ pageToken });
+          return { items: response.data.accounts || [], nextPageToken: response.data.nextPageToken };
+        });
+        const accounts = allAccounts.map((a) => ({
           name: a.name || "",
           displayName: a.displayName || "",
           createTime: a.createTime || "",

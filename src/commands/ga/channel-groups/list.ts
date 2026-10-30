@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { google } from "googleapis";
 import { getAuthClient } from "../../../lib/auth.js";
 import { formatOutput, type OutputFormat } from "../../../lib/format.js";
+import { paginateAll } from "../../../lib/paginate.js";
 import { toRow } from "./shared.js";
 
 export function registerListCommand(channelGroups: Command): void {
@@ -14,10 +15,13 @@ export function registerListCommand(channelGroups: Command): void {
         const auth = getAuthClient();
         const admin = google.analyticsadmin({ version: "v1alpha", auth });
 
-        const response = await admin.properties.channelGroups.list({
-          parent: `properties/${opts.property}`,
+        const groups = await paginateAll(async (pageToken) => {
+          const response = await admin.properties.channelGroups.list({
+            parent: `properties/${opts.property}`,
+            pageToken,
+          });
+          return { items: response.data.channelGroups || [], nextPageToken: response.data.nextPageToken };
         });
-        const groups = response.data.channelGroups || [];
 
         if ((opts.format as OutputFormat) === "json") {
           console.log(JSON.stringify(groups, null, 2));
