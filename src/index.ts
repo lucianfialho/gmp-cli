@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import { registerAuthCommand } from "./commands/auth.js";
+import { registerConfigCommand } from "./commands/config.js";
 import { registerGaCommand } from "./commands/ga/index.js";
 import { registerGscCommand } from "./commands/gsc/index.js";
 import { registerAdsCommand } from "./commands/ads.js";
@@ -19,6 +20,7 @@ program
   .version("1.5.0");
 
 registerAuthCommand(program);
+registerConfigCommand(program);
 registerGaCommand(program);
 registerGscCommand(program);
 registerAdsCommand(program);

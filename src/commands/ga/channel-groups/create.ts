@@ -2,12 +2,13 @@ import { Command } from "commander";
 import { google } from "googleapis";
 import { getAuthClient } from "../../../lib/auth.js";
 import { formatOutput, type OutputFormat } from "../../../lib/format.js";
+import { resolveProperty } from "../../../lib/config.js";
 import { type ChannelGroup, parseRules, toRow } from "./shared.js";
 
 export function registerCreateCommand(channelGroups: Command): void {
   channelGroups.command("create")
     .description("Create a custom channel group (requires analytics.edit scope)")
-    .requiredOption("-p, --property <id>", "GA4 property ID (numeric)")
+    .option("-p, --property <id>", "GA4 property ID (numeric); defaults to `gmp config set property`")
     .requiredOption("-n, --name <displayName>", "Display name for the channel group")
     .requiredOption(
       "--rules <json>",
@@ -18,6 +19,7 @@ export function registerCreateCommand(channelGroups: Command): void {
     .option("-f, --format <fmt>", "Output format: json, table, csv", "json")
     .action(async (opts) => {
       try {
+        const property = resolveProperty(opts.property);
         const auth = getAuthClient();
         const admin = google.analyticsadmin({ version: "v1alpha", auth });
 
@@ -29,7 +31,7 @@ export function registerCreateCommand(channelGroups: Command): void {
         };
 
         const response = await admin.properties.channelGroups.create({
-          parent: `properties/${opts.property}`,
+          parent: `properties/${property}`,
           requestBody,
         });
 

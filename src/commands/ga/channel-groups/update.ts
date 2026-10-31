@@ -2,12 +2,13 @@ import { Command } from "commander";
 import { google } from "googleapis";
 import { getAuthClient } from "../../../lib/auth.js";
 import { formatOutput, type OutputFormat } from "../../../lib/format.js";
+import { resolveProperty } from "../../../lib/config.js";
 import { type ChannelGroup, parseRules, toRow } from "./shared.js";
 
 export function registerUpdateCommand(channelGroups: Command): void {
   channelGroups.command("update")
     .description("Update a custom channel group (requires analytics.edit scope)")
-    .requiredOption("-p, --property <id>", "GA4 property ID (numeric)")
+    .option("-p, --property <id>", "GA4 property ID (numeric); defaults to `gmp config set property`")
     .requiredOption("-g, --group <id>", "Channel group ID")
     .option("-n, --name <displayName>", "New display name")
     .option("--rules <json>", "New JSON array of GroupingRule objects (replaces all existing rules)")
@@ -16,6 +17,7 @@ export function registerUpdateCommand(channelGroups: Command): void {
     .option("-f, --format <fmt>", "Output format: json, table, csv", "json")
     .action(async (opts) => {
       try {
+        const property = resolveProperty(opts.property);
         const auth = getAuthClient();
         const admin = google.analyticsadmin({ version: "v1alpha", auth });
 
@@ -43,7 +45,7 @@ export function registerUpdateCommand(channelGroups: Command): void {
         }
 
         const response = await admin.properties.channelGroups.patch({
-          name: `properties/${opts.property}/channelGroups/${opts.group}`,
+          name: `properties/${property}/channelGroups/${opts.group}`,
           updateMask: updateFields.join(","),
           requestBody,
         });
