@@ -77,6 +77,24 @@ gmp ads search-terms -c 1234567890 --campaign "Brand" -f table
 gmp ads query -c 1234567890 -q "SELECT campaign.name, metrics.clicks FROM campaign WHERE segments.date DURING LAST_7_DAYS"
 ```
 
+## Sorting (`--sort`, `--order`)
+
+`campaigns`, `adgroups`, `keywords`, and `search-terms` each take `--sort <field> --order <asc|desc>` (default `desc`), rewriting the report's `ORDER BY` clause. Each command only accepts the field names it actually outputs:
+
+| Command | Valid `--sort` fields | Default order |
+|---------|------------------------|---------------|
+| `campaigns` | `impressions`, `clicks`, `cost`, `conversions`, `convValue`, `ctr`, `avgCpc` | `cost DESC` |
+| `adgroups` | `impressions`, `clicks`, `cost`, `conversions`, `ctr` | `cost DESC` |
+| `keywords` | `impressions`, `clicks`, `cost`, `conversions`, `ctr`, `avgCpc`, `qualityScore` | `impressions DESC` |
+| `search-terms` | `impressions`, `clicks`, `cost`, `conversions`, `ctr` | `impressions DESC` |
+
+```bash
+gmp ads campaigns -c 1234567890 --sort cost --order desc -f table       # biggest spenders first
+gmp ads keywords -c 1234567890 --sort qualityScore --order asc -f table # worst quality score first
+```
+
+An unknown `--sort` value errors with the exact list of fields that command accepts.
+
 ## Date Range Values
 
 Google Ads uses predefined date range constants:

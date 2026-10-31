@@ -30,6 +30,8 @@ gmp ads campaigns -c <CUSTOMER_ID> [flags]
 | `-r, --date-range <range>` | No | `LAST_30_DAYS` | Date range constant |
 | `--status <s>` | No | -- | Filter: ENABLED, PAUSED, REMOVED |
 | `-l, --limit <n>` | No | `50` | Row limit |
+| `--sort <field>` | No | -- | `impressions`, `clicks`, `cost`, `conversions`, `convValue`, `ctr`, `avgCpc` |
+| `--order <dir>` | No | `desc` | Sort direction: `asc`, `desc` |
 | `-f, --format <fmt>` | No | `json` | Output format: json, table, csv |
 
 ## Output Columns
@@ -62,8 +64,11 @@ gmp ads campaigns -c 1234567890 -r LAST_7_DAYS -f table
 # Export to CSV
 gmp ads campaigns -c 1234567890 -f csv > campaigns.csv
 
-# Pipe to jq for top spenders
-gmp ads campaigns -c 1234567890 | jq 'sort_by(.cost | tonumber) | reverse | .[0:5]'
+# Top 5 spenders (server-side ORDER BY, no jq needed)
+gmp ads campaigns -c 1234567890 --sort cost --order desc -l 5 -f table
+
+# Highest CTR first
+gmp ads campaigns -c 1234567890 --sort ctr -f table
 ```
 
 ## See Also

@@ -16,9 +16,10 @@ Analyze the e-commerce conversion funnel using GA4 BigQuery export data. Shows d
 ## When to Use
 
 - You need funnel analysis with unsampled data
-- The GA4 Data API funnel reports are insufficient (alpha, limited)
-- You need historical funnel data beyond 90 days
-- You want to customize funnel steps beyond standard e-commerce events
+- You need historical funnel data beyond what the Data API retains
+- You want to customize funnel steps with arbitrary SQL beyond event-name matching
+
+For a quick funnel check without touching BigQuery, try [`gmp ga funnel`](../gmp-ga-funnel/SKILL.md) first -- it calls the same underlying funnel-report API directly and needs no BigQuery export or GCP project. Fall back to this BigQuery recipe when you need the unsampled/historical/fully-custom cases above.
 
 ## Prerequisites
 
