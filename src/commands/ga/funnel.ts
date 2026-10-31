@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { getAuthClient } from "../../lib/auth.js";
 import { formatOutput, type OutputFormat } from "../../lib/format.js";
 import { parseDateRange, rowsToObjects } from "./helpers.js";
+import { resolveProperty } from "../../lib/config.js";
 
 // The `googleapis` npm package does not yet expose runFunnelReport in its
 // generated types (confirmed against v188.0.0), even though it is live in
@@ -36,12 +37,8 @@ interface StepInput {
   withinDurationFromPriorStep?: string;
 }
 
-interface DimensionHeader {
-  name?: string;
-}
-interface MetricHeader {
-  name?: string;
-}
+interface DimensionHeader { name?: string }
+interface MetricHeader { name?: string }
 interface ApiRow {
   dimensionValues?: { value?: string }[];
   metricValues?: { value?: string }[];
@@ -87,7 +84,7 @@ function parseSteps(json: string): FunnelStep[] {
 export function registerFunnelCommand(ga: Command): void {
   ga.command("funnel")
     .description("Run a funnel report (GA4 Data API v1alpha, runFunnelReport)")
-    .requiredOption("-p, --property <id>", "GA4 property ID (numeric)")
+    .option("-p, --property <id>", "GA4 property ID (numeric); defaults to `gmp config set property`")
     .requiredOption(
       "--steps <json>",
       'JSON array of funnel steps, e.g. \'[{"name":"View","eventName":"page_view"},{"name":"Purchase","eventName":"purchase"}]\''
@@ -101,6 +98,7 @@ export function registerFunnelCommand(ga: Command): void {
     .option("-f, --format <fmt>", "Output format: json, table, csv", "table")
     .action(async (opts) => {
       try {
+        const property = resolveProperty(opts.property);
         const auth = getAuthClient();
         const steps = parseSteps(opts.steps as string);
         const dateRange = parseDateRange(opts.dateRange);
@@ -117,7 +115,7 @@ export function registerFunnelCommand(ga: Command): void {
         };
 
         const response = await auth.request<RunFunnelReportResponse>({
-          url: `${FUNNEL_REPORT_URL}/properties/${opts.property}:runFunnelReport`,
+          url: `${FUNNEL_REPORT_URL}/properties/${property}:runFunnelReport`,
           method: "POST",
           data: requestBody,
         });

@@ -3,6 +3,7 @@ import { google, analyticsdata_v1beta } from "googleapis";
 import { getAuthClient } from "../../lib/auth.js";
 import { formatOutput, type OutputFormat } from "../../lib/format.js";
 import { rowsToObjects } from "./helpers.js";
+import { resolveProperty } from "../../lib/config.js";
 
 type DimensionHeader = analyticsdata_v1beta.Schema$DimensionHeader;
 type MetricHeader = analyticsdata_v1beta.Schema$MetricHeader;
@@ -10,13 +11,14 @@ type MetricHeader = analyticsdata_v1beta.Schema$MetricHeader;
 export function registerRealtimeCommand(ga: Command): void {
   ga.command("realtime")
     .description("Run a realtime report")
-    .requiredOption("-p, --property <id>", "GA4 property ID")
+    .option("-p, --property <id>", "GA4 property ID; defaults to `gmp config set property`")
     .requiredOption("-m, --metrics <list>", "Comma-separated metrics")
     .option("-d, --dimensions <list>", "Comma-separated dimensions")
     .option("-l, --limit <n>", "Row limit", "100")
     .option("-f, --format <fmt>", "Output format: json, table, csv", "json")
     .action(async (opts) => {
       try {
+        const property = resolveProperty(opts.property);
         const auth = getAuthClient();
         const analyticsData = google.analyticsdata({ version: "v1beta", auth });
 
@@ -26,7 +28,7 @@ export function registerRealtimeCommand(ga: Command): void {
           : undefined;
 
         const response = await analyticsData.properties.runRealtimeReport({
-          property: `properties/${opts.property}`,
+          property: `properties/${property}`,
           requestBody: { metrics, dimensions, limit: opts.limit as string },
         });
 

@@ -2,16 +2,18 @@ import { Command } from "commander";
 import { google } from "googleapis";
 import { getAuthClient } from "../../lib/auth.js";
 import { formatOutput, type OutputFormat } from "../../lib/format.js";
+import { resolveProperty } from "../../lib/config.js";
 
 export function registerCheckCommand(ga: Command): void {
   ga.command("check")
     .description("Check dimension/metric compatibility")
-    .requiredOption("-p, --property <id>", "GA4 property ID")
+    .option("-p, --property <id>", "GA4 property ID; defaults to `gmp config set property`")
     .requiredOption("-m, --metrics <list>", "Comma-separated metrics")
     .option("-d, --dimensions <list>", "Comma-separated dimensions")
     .option("-f, --format <fmt>", "Output format: json, table, csv", "json")
     .action(async (opts) => {
       try {
+        const property = resolveProperty(opts.property);
         const auth = getAuthClient();
         const analyticsData = google.analyticsdata({ version: "v1beta", auth });
 
@@ -21,7 +23,7 @@ export function registerCheckCommand(ga: Command): void {
           : undefined;
 
         const response = await analyticsData.properties.checkCompatibility({
-          property: `properties/${opts.property}`,
+          property: `properties/${property}`,
           requestBody: { metrics, dimensions },
         });
 

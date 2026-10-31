@@ -2,20 +2,22 @@ import { Command } from "commander";
 import { google } from "googleapis";
 import { getAuthClient } from "../../lib/auth.js";
 import { formatOutput, type OutputFormat } from "../../lib/format.js";
+import { resolveProperty } from "../../lib/config.js";
 
 export function registerMetadataCommand(ga: Command): void {
   ga.command("metadata")
     .description("List available dimensions and metrics")
-    .requiredOption("-p, --property <id>", "GA4 property ID")
+    .option("-p, --property <id>", "GA4 property ID; defaults to `gmp config set property`")
     .option("--type <type>", "Filter: dimensions, metrics, or all", "all")
     .option("-f, --format <fmt>", "Output format: json, table, csv", "table")
     .action(async (opts) => {
       try {
+        const property = resolveProperty(opts.property);
         const auth = getAuthClient();
         const analyticsData = google.analyticsdata({ version: "v1beta", auth });
 
         const response = await analyticsData.properties.getMetadata({
-          name: `properties/${opts.property}/metadata`,
+          name: `properties/${property}/metadata`,
         });
 
         const data = response.data;

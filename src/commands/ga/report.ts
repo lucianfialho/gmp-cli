@@ -3,6 +3,7 @@ import { google, analyticsdata_v1beta } from "googleapis";
 import { getAuthClient } from "../../lib/auth.js";
 import { formatOutput, type OutputFormat } from "../../lib/format.js";
 import { parseDateRange, rowsToObjects } from "./helpers.js";
+import { resolveProperty } from "../../lib/config.js";
 
 type DimensionHeader = analyticsdata_v1beta.Schema$DimensionHeader;
 type MetricHeader = analyticsdata_v1beta.Schema$MetricHeader;
@@ -10,7 +11,7 @@ type MetricHeader = analyticsdata_v1beta.Schema$MetricHeader;
 export function registerReportCommand(ga: Command): void {
   ga.command("report")
     .description("Run a report (dimensions + metrics)")
-    .requiredOption("-p, --property <id>", "GA4 property ID (numeric)")
+    .option("-p, --property <id>", "GA4 property ID (numeric); defaults to `gmp config set property`")
     .requiredOption("-m, --metrics <list>", "Comma-separated metrics")
     .option("-d, --dimensions <list>", "Comma-separated dimensions")
     .option("-r, --date-range <range>", "Date range: 30d, 7d, 2024-01-01..2024-01-31", "30d")
@@ -19,6 +20,7 @@ export function registerReportCommand(ga: Command): void {
     .option("-f, --format <fmt>", "Output format: json, table, csv", "json")
     .action(async (opts) => {
       try {
+        const property = resolveProperty(opts.property);
         const auth = getAuthClient();
         const analyticsData = google.analyticsdata({ version: "v1beta", auth });
 
@@ -42,7 +44,7 @@ export function registerReportCommand(ga: Command): void {
         }
 
         const response = await analyticsData.properties.runReport({
-          property: `properties/${opts.property}`,
+          property: `properties/${property}`,
           requestBody: {
             dateRanges: [dateRange],
             metrics,

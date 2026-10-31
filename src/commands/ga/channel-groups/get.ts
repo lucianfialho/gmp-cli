@@ -2,21 +2,23 @@ import { Command } from "commander";
 import { google } from "googleapis";
 import { getAuthClient } from "../../../lib/auth.js";
 import { formatOutput, type OutputFormat } from "../../../lib/format.js";
+import { resolveProperty } from "../../../lib/config.js";
 import { toRow } from "./shared.js";
 
 export function registerGetCommand(channelGroups: Command): void {
   channelGroups.command("get")
     .description("Get a single channel group's details, including its grouping rules")
-    .requiredOption("-p, --property <id>", "GA4 property ID (numeric)")
+    .option("-p, --property <id>", "GA4 property ID (numeric); defaults to `gmp config set property`")
     .requiredOption("-g, --group <id>", "Channel group ID")
     .option("-f, --format <fmt>", "Output format: json, table, csv", "json")
     .action(async (opts) => {
       try {
+        const property = resolveProperty(opts.property);
         const auth = getAuthClient();
         const admin = google.analyticsadmin({ version: "v1alpha", auth });
 
         const response = await admin.properties.channelGroups.get({
-          name: `properties/${opts.property}/channelGroups/${opts.group}`,
+          name: `properties/${property}/channelGroups/${opts.group}`,
         });
 
         if ((opts.format as OutputFormat) === "json") {
