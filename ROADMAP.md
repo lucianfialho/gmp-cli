@@ -67,7 +67,7 @@
 - [x] GA4 Data API v1alpha — funnel reports ([#2](https://github.com/lucianfialho/gmp-cli/issues/2)) — `gmp ga funnel`; audience-list/report-task still open
 - [x] Auto-pagination for large result sets — `ga accounts/properties/channel-groups`, `gtm accounts/containers/tags/triggers/variables/versions`, `bq explore/query/custom`
 - [x] `--sort` and `--order` flags for reports — `ga report` (native orderBys), `gsc report` (client-side), `ads campaigns/adgroups/keywords/search-terms` (GAQL ORDER BY)
-- [ ] `--compare` flag for period-over-period
+- [x] `--compare` flag for period-over-period — `ga report --compare previous_period|previous_year` (native multi-dateRanges); gsc/ads --compare not implemented (no native multi-range support, would need separate follow-up)
 
 ## v2.0 — Cross-service Workflows
 
