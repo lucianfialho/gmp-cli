@@ -30,6 +30,7 @@ gmp bq query -t <template-name> --project <gcp-project> --dataset <dataset> [fla
 | `--project <id>` | Yes | -- | GCP project ID |
 | `--dataset <name>` | Yes | -- | BigQuery dataset name |
 | `-r, --date-range <range>` | No | `30d` | Date range: `30d`, `7d`, `2024-01-01..2024-03-31` |
+| `--privacy-filter` | No | off | Mask known GA4 PII fields (redact, or pseudonymize if `GMP_PII_SALT` is set) |
 | `-f, --format <fmt>` | No | `json` | Output format: json, table, csv |
 
 ## Template Parameters
