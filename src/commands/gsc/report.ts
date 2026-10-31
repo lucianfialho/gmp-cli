@@ -16,6 +16,8 @@ export function registerReportCommand(gsc: Command): void {
     .option("--query <q>", "Filter by query (contains)")
     .option("--page <p>", "Filter by page URL (contains)")
     .option("--type <t>", "Search type: web, image, video, news, discover, googleNews", "web")
+    .option("--sort <field>", "Sort by: clicks, impressions, ctr, position, or a requested dimension")
+    .option("--order <dir>", "Sort direction: asc, desc", "desc")
     .option("-f, --format <fmt>", "Output format: json, table, csv", "json")
     .action(async (opts) => {
       try {
@@ -73,7 +75,24 @@ export function registerReportCommand(gsc: Command): void {
           requestBody,
         });
 
-        const rows = (response.data.rows || []).map((row: ApiRow) => {
+        let apiRows = response.data.rows || [];
+        if (opts.sort) {
+          const field = opts.sort as string;
+          const dimIndex = dimensions?.indexOf(field) ?? -1;
+          const validFields = ["clicks", "impressions", "ctr", "position", ...(dimensions || [])];
+          if (dimIndex < 0 && !["clicks", "impressions", "ctr", "position"].includes(field)) {
+            throw new Error(`--sort "${field}" must be one of: ${validFields.join(", ")}`);
+          }
+          const dir = (opts.order as string) === "asc" ? 1 : -1;
+          apiRows = [...apiRows].sort((a, b) => {
+            const av = dimIndex >= 0 ? a.keys?.[dimIndex] ?? "" : a[field as "clicks" | "impressions" | "ctr" | "position"] ?? 0;
+            const bv = dimIndex >= 0 ? b.keys?.[dimIndex] ?? "" : b[field as "clicks" | "impressions" | "ctr" | "position"] ?? 0;
+            if (typeof av === "number" && typeof bv === "number") return (av - bv) * dir;
+            return String(av).localeCompare(String(bv)) * dir;
+          });
+        }
+
+        const rows = apiRows.map((row: ApiRow) => {
           const obj: Record<string, string> = {};
           if (dimensions) {
             (row.keys || []).forEach((key: string, i: number) => {
