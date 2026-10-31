@@ -15,18 +15,24 @@ metadata:
 
 > **PREREQUISITE:** Load the following skills to execute this recipe: `gmp-ga`
 
-Compare traffic metrics between two time periods to identify trends, growth, or drops.
+Compare traffic metrics between two time periods to identify trends, growth, or drops. `ga report` does this natively with `--compare` -- one API call, correct date math, current/previous rows already in the response. Prefer it over running two separate reports and diffing by hand.
 
 ## Steps
 
-1. This week vs last week:
-   - This week: `gmp ga report -p PROPERTY_ID -m sessions,activeUsers,screenPageViews -r 7d -f table`
-   - Last week: `gmp ga report -p PROPERTY_ID -m sessions,activeUsers,screenPageViews -r 14d..8d -f table`
+1. This week vs the equal-length prior week:
+   `gmp ga report -p PROPERTY_ID -m sessions,activeUsers,screenPageViews -r 7d --compare previous_period -f table`
 
-2. This month vs last month:
-   - This month: `gmp ga report -p PROPERTY_ID -m sessions,activeUsers,conversions -r 30d -f table`
-   - Last month: `gmp ga report -p PROPERTY_ID -m sessions,activeUsers,conversions -r 60d..31d -f table`
+2. This month (last 30 days) vs the prior 30 days:
+   `gmp ga report -p PROPERTY_ID -m sessions,activeUsers,conversions -r 30d --compare previous_period -f table`
 
-3. Year over year (custom dates):
-   - This year: `gmp ga report -p PROPERTY_ID -m sessions -d date -r 2025-01-01..2025-01-31 -f csv > jan2025.csv`
-   - Last year: `gmp ga report -p PROPERTY_ID -m sessions -d date -r 2024-01-01..2024-01-31 -f csv > jan2024.csv`
+3. Year over year, same dates:
+   `gmp ga report -p PROPERTY_ID -m sessions -r 2025-01-01..2025-01-31 --compare previous_year -f table`
+
+4. Break a comparison down by dimension (e.g. by channel) -- `--compare` composes with `-d`:
+   `gmp ga report -p PROPERTY_ID -m sessions -d sessionDefaultChannelGroup -r 30d --compare previous_period -f table`
+
+The output includes an implicit `dateRange` column (`current`/`previous`) distinguishing the two periods -- no need to request it as a dimension.
+
+## When to fall back to two separate calls
+
+`--compare` only supports `previous_period` (equal-length preceding window) and `previous_year` (same dates, one year back). For an arbitrary non-adjacent comparison (e.g. this quarter vs a specific quarter two years ago that isn't exactly "previous year"), run two reports with explicit `-r start..end` ranges and diff the results yourself -- `gsc report` and the `ads` reports also have no native compare support and always need this two-call approach.

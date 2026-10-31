@@ -21,4 +21,4 @@ Break down traffic by acquisition channel to understand where users come from.
 
 1. Sessions by channel: `gmp ga report -p PROPERTY_ID -m sessions,activeUsers,conversions -d sessionDefaultChannelGroup -r 30d -f table`
 2. Source/medium detail: `gmp ga report -p PROPERTY_ID -m sessions,activeUsers -d sessionSource,sessionMedium -r 30d -l 20 -f table`
-3. Compare to previous period: `gmp ga report -p PROPERTY_ID -m sessions -d sessionDefaultChannelGroup -r 60d..31d -f table`
+3. Compare each channel to the prior period in one call: `gmp ga report -p PROPERTY_ID -m sessions -d sessionDefaultChannelGroup -r 30d --compare previous_period -f table` (see `recipe-compare-periods`)

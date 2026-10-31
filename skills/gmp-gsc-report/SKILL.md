@@ -33,6 +33,8 @@ gmp gsc report -s <SITE_URL> [flags]
 | `--query <q>` | No | -- | Filter by query (contains) |
 | `--page <p>` | No | -- | Filter by page URL (contains) |
 | `--type <t>` | No | `web` | Search type: web, image, video, news, discover, googleNews |
+| `--sort <field>` | No | -- | Sort by: `clicks`, `impressions`, `ctr`, `position`, or a requested dimension |
+| `--order <dir>` | No | `desc` | Sort direction: `asc`, `desc` |
 | `-f, --format <fmt>` | No | `json` | Output format: json, table, csv |
 
 ## Output Columns
@@ -80,6 +82,12 @@ gmp gsc report -s "https://example.com/" -d query -r 2024-01-01..2024-01-31
 
 # Export to CSV
 gmp gsc report -s "https://example.com/" -d query,page -f csv > gsc-report.csv
+
+# Queries sorted by CTR instead of the API's default (clicks desc)
+gmp gsc report -s "https://example.com/" -d query --sort ctr -f table
+
+# Lowest-position (worst-ranking) queries first
+gmp gsc report -s "https://example.com/" -d query --sort position --order desc -f table
 ```
 
 ## Tips
@@ -89,6 +97,7 @@ gmp gsc report -s "https://example.com/" -d query,page -f csv > gsc-report.csv
 - Combine dimensions for cross-analysis: `-d query,page` shows which queries lead to which pages.
 - Use `--query` and `--page` filters to narrow results without downloading everything.
 - Pipe JSON output to `jq` for filtering: `gmp gsc report ... | jq '[.[] | select(.clicks > 10)]'`
+- `--sort` reorders only the rows already returned by `-l/--limit` -- the Search Console API has no server-side ordering, unlike `ga report`. Raise `-l` first if you need the sort to consider a larger set.
 
 ## See Also
 

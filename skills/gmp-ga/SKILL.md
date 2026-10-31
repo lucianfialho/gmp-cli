@@ -28,6 +28,10 @@ gmp ga <command> [flags]
 | `accounts` | List GA4 accounts |
 | `properties` | List GA4 properties for an account |
 | `check` | Check dimension/metric compatibility |
+| [`funnel`](../gmp-ga-funnel/SKILL.md) | Run a funnel report (Data API v1alpha) |
+| [`channel-groups`](../gmp-ga-channel-groups/SKILL.md) | Manage custom channel groups (Admin API v1alpha) |
+
+`-p/--property` and `-a/--account` are optional on every subcommand above -- they fall back to `gmp config set property/account` when omitted. See `../gmp-shared/SKILL.md`.
 
 ## Quick Reference
 
@@ -64,4 +68,5 @@ gmp ga check -p PROPERTY_ID -m sessions,bounceRate -d pagePath
 - Property IDs are numeric (e.g. `123456789`), not the `G-XXXXXXXX` measurement ID.
 - Use `gmp ga metadata` to discover available metrics and dimensions before running reports.
 - Use `gmp ga check` to validate metric/dimension combinations before complex reports.
+- `gmp ga report` supports `--sort <field> --order <asc|desc>` (server-side top-N) and `--compare previous_period|previous_year` (period-over-period in one call). See [gmp-ga-report](../gmp-ga-report/SKILL.md).
 - Default output is JSON -- use `-f table` for human-readable output.

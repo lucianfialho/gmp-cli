@@ -62,7 +62,12 @@ gmp bq explore --project my-project --dataset analytics_123456789 --table events
 
 ```bash
 gmp bq custom --project my-project -q "SELECT event_date, COUNT(*) FROM \`my-project.analytics_123456789.events_20240101\` GROUP BY event_date"
+
+# Mask PII fields (user_pseudo_id, user_id, email, phone, address) before output
+gmp bq custom --project my-project -q "SELECT user_pseudo_id, event_name FROM ..." --privacy-filter
 ```
+
+`query` and `custom` both accept `--privacy-filter`: redacts known GA4 PII fields by default, or pseudonymizes them (stable hash, not reversible) if `GMP_PII_SALT` is set in the environment.
 
 ## Available Templates
 
