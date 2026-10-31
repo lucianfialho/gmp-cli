@@ -5,7 +5,7 @@ import { registerAuthCommand } from "./commands/auth.js";
 import { registerConfigCommand } from "./commands/config.js";
 import { registerGaCommand } from "./commands/ga/index.js";
 import { registerGscCommand } from "./commands/gsc/index.js";
-import { registerAdsCommand } from "./commands/ads.js";
+import { registerAdsCommand } from "./commands/ads/index.js";
 import { registerGtmCommand } from "./commands/gtm/index.js";
 import { registerBqCommand } from "./commands/bq/index.js";
 import { registerPsiCommand } from "./commands/psi.js";

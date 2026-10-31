@@ -17,6 +17,8 @@ export function registerReportCommand(ga: Command): void {
     .option("-r, --date-range <range>", "Date range: 30d, 7d, 2024-01-01..2024-01-31", "30d")
     .option("-l, --limit <n>", "Row limit", "10000")
     .option("--filter <expr>", "Dimension filter (fieldName==value)")
+    .option("--sort <field>", "Sort by this dimension or metric name (must be one of --metrics/--dimensions)")
+    .option("--order <dir>", "Sort direction: asc, desc", "desc")
     .option("-f, --format <fmt>", "Output format: json, table, csv", "json")
     .action(async (opts) => {
       try {
@@ -29,6 +31,18 @@ export function registerReportCommand(ga: Command): void {
         const dimensions = opts.dimensions
           ? (opts.dimensions as string).split(",").map((d) => ({ name: d.trim() }))
           : undefined;
+
+        let orderBys: analyticsdata_v1beta.Schema$OrderBy[] | undefined;
+        if (opts.sort) {
+          const desc = (opts.order as string) !== "asc";
+          if (metrics.some((m) => m.name === opts.sort)) {
+            orderBys = [{ metric: { metricName: opts.sort as string }, desc }];
+          } else if (dimensions?.some((d) => d.name === opts.sort)) {
+            orderBys = [{ dimension: { dimensionName: opts.sort as string }, desc }];
+          } else {
+            throw new Error(`--sort "${opts.sort}" must be one of the requested --metrics/--dimensions`);
+          }
+        }
 
         let dimensionFilter: analyticsdata_v1beta.Schema$FilterExpression | undefined;
         if (opts.filter) {
@@ -50,6 +64,7 @@ export function registerReportCommand(ga: Command): void {
             metrics,
             dimensions,
             dimensionFilter,
+            orderBys,
             limit: opts.limit as string,
           },
         });
