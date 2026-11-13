@@ -1,0 +1,32 @@
+name: Risco
+
+# Classifica o PR por regra fixa (sem LLM). risco:alto sempre exige revisão humana.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  risco:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Classificar
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          files=$(gh pr view "$PR" -R "$REPO" --json files --jq '.files[].path')
+          linhas=$(gh pr view "$PR" -R "$REPO" --json additions,deletions --jq '.additions + .deletions')
+          motivo=""
+          echo "$files" | grep -qE '^\.github/'                 && motivo="$motivo CI;"
+          echo "$files" | grep -qE '^package(-lock)?\.json$'    && motivo="$motivo dependências;"
+          echo "$files" | grep -qiE 'auth|oauth|token|credential|secret|(^|\/)config\.ts$' && motivo="$motivo autenticação/credenciais;"
+          [ "$linhas" -gt 300 ]                                  && motivo="$motivo diff de $linhas linhas;"
+          if [ -n "$motivo" ]; then add=risco:alto; rm=risco:baixo; else add=risco:baixo; rm=risco:alto; fi
+          gh pr edit "$PR" -R "$REPO" --add-label "$add" --remove-label "$rm" 2>/dev/null \
+            || gh pr edit "$PR" -R "$REPO" --add-label "$add"
+          echo "### $add${motivo:+ —$motivo}" >> "$GITHUB_STEP_SUMMARY"
