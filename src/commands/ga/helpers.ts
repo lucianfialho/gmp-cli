@@ -93,15 +93,15 @@ type RunReportResponse = analyticsdata_v1beta.Schema$RunReportResponse;
 
 /**
  * Runs a GA4 report, following `offset` pages until all `rowCount` rows are
- * fetched (or until `limit` rows, when given). `first` is the first page's
+ * fetched (or until `limit` rows, when given; `maxRows` caps the no-limit case). `first` is the first page's
  * response, which carries the dimension/metric headers.
  */
 export async function runPaginatedReport(
   runReport: (params: { property: string; requestBody: RunReportRequest }) => Promise<{ data: RunReportResponse }>,
   property: string,
   requestBody: RunReportRequest,
-  limit?: number
-): Promise<{ rows: Row[]; total: number; truncated: boolean; first: RunReportResponse }> {
+  opts: { limit?: number; maxRows?: number } = {}
+): Promise<{ rows: Row[]; total: number; truncated: boolean; stoppedEarly: boolean; first: RunReportResponse }> {
   let first: RunReportResponse = {};
   let page = 0;
   const result = await paginateByOffset<Row>(async (offset, pageLimit) => {
@@ -111,6 +111,6 @@ export async function runPaginatedReport(
     });
     if (page++ === 0) first = data;
     return { items: data.rows || [], total: data.rowCount };
-  }, { limit });
-  return { rows: result.items, total: result.total, truncated: result.truncated, first };
+  }, opts);
+  return { rows: result.items, total: result.total, truncated: result.truncated, stoppedEarly: result.stoppedEarly, first };
 }

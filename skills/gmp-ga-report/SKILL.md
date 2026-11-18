@@ -31,6 +31,7 @@ gmp ga report -p <PROPERTY_ID> -m <METRICS> [flags]
 | `-d, --dimensions <list>` | No | -- | Comma-separated dimensions |
 | `-r, --date-range <range>` | No | `30d` | Date range: `30d`, `7d`, `yesterday`, `2024-01-01..2024-01-31` |
 | `-l, --limit <n>` | No | all rows | Max rows to return. Without it, the report is auto-paginated (up to 250,000 rows per request) until every row is fetched. With it, output is cut at N and stderr says `# truncated: ...` |
+| `--max-rows <n>` | No | `1000000` | Safety ceiling when `--limit` is not given. If the report is larger, output stops at N, stderr says `# WARNING: truncated: ...` and the exit code is 1 |
 | `--filter <expr>` | No | -- | Dimension filter (`fieldName==value`) |
 | `--sort <field>` | No | -- | Sort by a requested metric or dimension name (server-side, via the API's native `orderBys`) |
 | `--order <dir>` | No | `desc` | Sort direction: `asc`, `desc` |

@@ -53,7 +53,7 @@ test("sem --limit: nunca pede mais de 250.000 linhas por requisição", async ()
 
 test("com --limit N explícito: devolve N linhas, total real e truncated", async () => {
   const { runReport, calls } = fakeRunReport(11698);
-  const r = await runPaginatedReport(runReport, "properties/1", {}, 500);
+  const r = await runPaginatedReport(runReport, "properties/1", {}, { limit: 500 });
   assert.equal(r.rows.length, 500);
   assert.equal(r.total, 11698);
   assert.equal(r.truncated, true);
@@ -63,7 +63,7 @@ test("com --limit N explícito: devolve N linhas, total real e truncated", async
 
 test("--limit maior que o total devolve tudo sem truncar", async () => {
   const { runReport } = fakeRunReport(42);
-  const r = await runPaginatedReport(runReport, "properties/1", {}, 1000);
+  const r = await runPaginatedReport(runReport, "properties/1", {}, { limit: 1000 });
   assert.equal(r.rows.length, 42);
   assert.equal(r.truncated, false);
 });
@@ -83,5 +83,48 @@ test("página vazia antes do total: para e marca truncated (não falha em silên
   assert.deepEqual(r.items, [1, 2, 3]);
   assert.equal(r.total, 10);
   assert.equal(r.truncated, true);
+  assert.equal(r.stoppedEarly, true);
   assert.equal(call, 2);
+});
+
+test("sem --limit: --max-rows limita o total buscado e marca truncated", async () => {
+  const { runReport, calls } = fakeRunReport(11698);
+  const r = await runPaginatedReport(runReport, "properties/1", {}, { maxRows: 10500 });
+  assert.equal(r.rows.length, 10500);
+  assert.equal(r.total, 11698);
+  assert.equal(r.truncated, true);
+  assert.equal(r.stoppedEarly, false);
+  assert.deepEqual(calls.map((c) => [c.offset, c.limit]), [[0, 10500], [10000, 500]]);
+});
+
+test("--limit acima do tamanho de página percorre várias páginas", async () => {
+  const { runReport, calls } = fakeRunReport(30000);
+  const r = await runPaginatedReport(runReport, "properties/1", {}, { limit: 25000 });
+  assert.equal(r.rows.length, 25000);
+  assert.equal(r.truncated, true);
+  assert.deepEqual(calls.map((c) => c.offset), [0, 10000, 20000]);
+  assert.equal(calls[2].limit, 5000);
+});
+
+test("rowCount ausente: mantém as linhas e segue até uma página curta", async () => {
+  const pages = [[1, 2, 3], [4, 5, 6], [7]];
+  const offsets = [];
+  const fetchPage = async (offset) => {
+    offsets.push(offset);
+    return { items: pages[offsets.length - 1], total: undefined };
+  };
+  const r = await paginateByOffset(fetchPage, { pageSize: 3 });
+  assert.deepEqual(r.items, [1, 2, 3, 4, 5, 6, 7]);
+  assert.equal(r.total, 7);
+  assert.equal(r.truncated, false);
+  assert.deepEqual(offsets, [0, 3, 6]);
+});
+
+test("--limit com API parando antes: stoppedEarly distingue do corte pedido", async () => {
+  let call = 0;
+  const fetchPage = async () => (call++ === 0 ? { items: [1, 2], total: 10 } : { items: [], total: 10 });
+  const r = await paginateByOffset(fetchPage, { limit: 5, pageSize: 2 });
+  assert.deepEqual(r.items, [1, 2]);
+  assert.equal(r.stoppedEarly, true);
+  assert.equal(r.truncated, true);
 });

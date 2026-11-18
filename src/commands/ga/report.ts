@@ -16,6 +16,7 @@ export function registerReportCommand(ga: Command): void {
     .option("-d, --dimensions <list>", "Comma-separated dimensions")
     .option("-r, --date-range <range>", "Date range: 30d, 7d, 2024-01-01..2024-01-31", "30d")
     .option("-l, --limit <n>", "Max rows to return (default: all rows, auto-paginated)")
+    .option("--max-rows <n>", "Safety ceiling when --limit is not given; exits 1 if the report is larger", "1000000")
     .option("--filter <expr>", "Dimension filter (fieldName==value)")
     .option("--sort <field>", "Sort by this dimension or metric name (must be one of --metrics/--dimensions)")
     .option("--order <dir>", "Sort direction: asc, desc", "desc")
@@ -72,17 +73,14 @@ export function registerReportCommand(ga: Command): void {
           }
         }
 
-        let limit: number | undefined;
-        if (opts.limit !== undefined) {
-          limit = Number(opts.limit);
-          if (!Number.isInteger(limit) || limit <= 0) throw new Error("--limit must be a positive integer");
-        }
+        const limit = opts.limit !== undefined ? parsePositiveInt(opts.limit, "--limit") : undefined;
+        const maxRows = parsePositiveInt(opts.maxRows, "--max-rows");
 
         const result = await runPaginatedReport(
           (params) => analyticsData.properties.runReport(params),
           `properties/${property}`,
           { dateRanges, metrics, dimensions, dimensionFilter, orderBys },
-          limit
+          { limit, maxRows }
         );
         const dimHeaders = (result.first.dimensionHeaders || []).map((h: DimensionHeader) => h.name || "");
         const metricHeaders = (result.first.metricHeaders || []).map((h: MetricHeader) => h.name || "");
@@ -94,17 +92,24 @@ export function registerReportCommand(ga: Command): void {
         if (result.total) {
           console.error(`\n# ${result.total} total rows`);
         }
-        if (result.truncated) {
-          if (limit !== undefined) {
-            console.error(`# truncated: returned ${rows.length} of ${result.total} rows (--limit ${limit})`);
-          } else {
-            console.error(`# WARNING: truncated: returned only ${rows.length} of ${result.total} rows (API stopped returning rows)`);
-            process.exitCode = 1;
-          }
+        if (result.stoppedEarly) {
+          console.error(`# WARNING: truncated: returned only ${rows.length} of ${result.total} rows (API stopped returning rows)`);
+          process.exitCode = 1;
+        } else if (result.truncated && limit !== undefined) {
+          console.error(`# truncated: returned ${rows.length} of ${result.total} rows (--limit ${limit})`);
+        } else if (result.truncated) {
+          console.error(`# WARNING: truncated: returned ${rows.length} of ${result.total} rows (--max-rows ${maxRows}; raise it or pass --limit)`);
+          process.exitCode = 1;
         }
       } catch (err) {
         console.error("Error:", (err as Error).message);
         process.exit(1);
       }
     });
+}
+
+function parsePositiveInt(value: unknown, flag: string): number {
+  const n = Number(value);
+  if (!Number.isInteger(n) || n <= 0) throw new Error(`${flag} must be a positive integer`);
+  return n;
 }
