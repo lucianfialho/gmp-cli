@@ -2,7 +2,7 @@ import { Command } from "commander";
 import { google, analyticsdata_v1beta } from "googleapis";
 import { getAuthClient } from "../../lib/auth.js";
 import { formatOutput, type OutputFormat } from "../../lib/format.js";
-import { computeCompareRange, parseDateRange, resolveConcreteDateRange, rowsToObjects, toISODate, type CompareMode } from "./helpers.js";
+import { computeCompareRange, parseDateRange, resolveConcreteDateRange, rowsToObjects, runPaginatedReport, toISODate, type CompareMode } from "./helpers.js";
 import { resolveProperty } from "../../lib/config.js";
 
 type DimensionHeader = analyticsdata_v1beta.Schema$DimensionHeader;
@@ -15,7 +15,7 @@ export function registerReportCommand(ga: Command): void {
     .requiredOption("-m, --metrics <list>", "Comma-separated metrics")
     .option("-d, --dimensions <list>", "Comma-separated dimensions")
     .option("-r, --date-range <range>", "Date range: 30d, 7d, 2024-01-01..2024-01-31", "30d")
-    .option("-l, --limit <n>", "Row limit", "10000")
+    .option("-l, --limit <n>", "Max rows to return (default: all rows, auto-paginated)")
     .option("--filter <expr>", "Dimension filter (fieldName==value)")
     .option("--sort <field>", "Sort by this dimension or metric name (must be one of --metrics/--dimensions)")
     .option("--order <dir>", "Sort direction: asc, desc", "desc")
@@ -72,27 +72,35 @@ export function registerReportCommand(ga: Command): void {
           }
         }
 
-        const response = await analyticsData.properties.runReport({
-          property: `properties/${property}`,
-          requestBody: {
-            dateRanges,
-            metrics,
-            dimensions,
-            dimensionFilter,
-            orderBys,
-            limit: opts.limit as string,
-          },
-        });
+        let limit: number | undefined;
+        if (opts.limit !== undefined) {
+          limit = Number(opts.limit);
+          if (!Number.isInteger(limit) || limit <= 0) throw new Error("--limit must be a positive integer");
+        }
 
-        const dimHeaders = (response.data.dimensionHeaders || []).map((h: DimensionHeader) => h.name || "");
-        const metricHeaders = (response.data.metricHeaders || []).map((h: MetricHeader) => h.name || "");
+        const result = await runPaginatedReport(
+          (params) => analyticsData.properties.runReport(params),
+          `properties/${property}`,
+          { dateRanges, metrics, dimensions, dimensionFilter, orderBys },
+          limit
+        );
+        const dimHeaders = (result.first.dimensionHeaders || []).map((h: DimensionHeader) => h.name || "");
+        const metricHeaders = (result.first.metricHeaders || []).map((h: MetricHeader) => h.name || "");
         const headers = [...dimHeaders, ...metricHeaders];
-        const rows = rowsToObjects(response.data.rows || [], dimHeaders, metricHeaders);
+        const rows = rowsToObjects(result.rows, dimHeaders, metricHeaders);
 
         console.log(formatOutput(rows, opts.format as OutputFormat, headers));
 
-        if (response.data.rowCount) {
-          console.error(`\n# ${response.data.rowCount} total rows`);
+        if (result.total) {
+          console.error(`\n# ${result.total} total rows`);
+        }
+        if (result.truncated) {
+          if (limit !== undefined) {
+            console.error(`# truncated: returned ${rows.length} of ${result.total} rows (--limit ${limit})`);
+          } else {
+            console.error(`# WARNING: truncated: returned only ${rows.length} of ${result.total} rows (API stopped returning rows)`);
+            process.exitCode = 1;
+          }
         }
       } catch (err) {
         console.error("Error:", (err as Error).message);
