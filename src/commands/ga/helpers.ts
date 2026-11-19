@@ -1,4 +1,5 @@
 import { analyticsdata_v1beta } from "googleapis";
+import { paginateByOffset } from "../../lib/paginate.js";
 
 type Row = analyticsdata_v1beta.Schema$Row;
 
@@ -85,4 +86,31 @@ export function rowsToObjects(
     });
     return obj;
   });
+}
+
+type RunReportRequest = analyticsdata_v1beta.Schema$RunReportRequest;
+type RunReportResponse = analyticsdata_v1beta.Schema$RunReportResponse;
+
+/**
+ * Runs a GA4 report, following `offset` pages until all `rowCount` rows are
+ * fetched (or until `limit` rows, when given; `maxRows` caps the no-limit case). `first` is the first page's
+ * response, which carries the dimension/metric headers.
+ */
+export async function runPaginatedReport(
+  runReport: (params: { property: string; requestBody: RunReportRequest }) => Promise<{ data: RunReportResponse }>,
+  property: string,
+  requestBody: RunReportRequest,
+  opts: { limit?: number; maxRows?: number } = {}
+): Promise<{ rows: Row[]; total: number; truncated: boolean; stoppedEarly: boolean; first: RunReportResponse }> {
+  let first: RunReportResponse = {};
+  let page = 0;
+  const result = await paginateByOffset<Row>(async (offset, pageLimit) => {
+    const { data } = await runReport({
+      property,
+      requestBody: { ...requestBody, offset: String(offset), limit: String(pageLimit) },
+    });
+    if (page++ === 0) first = data;
+    return { items: data.rows || [], total: data.rowCount };
+  }, opts);
+  return { rows: result.items, total: result.total, truncated: result.truncated, stoppedEarly: result.stoppedEarly, first };
 }
