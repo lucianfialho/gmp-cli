@@ -305,6 +305,20 @@ gmp bq explore --project my-project --dataset analytics_123456789 --table events
 gmp bq custom --project my-project -q "SELECT event_date, COUNT(*) as events FROM \`my-project.analytics_123456789.events_20240101\` GROUP BY event_date"
 ```
 
+### Control query cost
+
+`gmp bq query` and `gmp bq custom` accept two flags to keep BigQuery spend predictable:
+
+```bash
+# Estimate bytes processed without running (or billing) the query
+gmp bq custom --project my-project --dry-run -q "SELECT * FROM \`my-project.analytics_123456789.events_*\` WHERE _TABLE_SUFFIX >= '20240101'"
+
+# Fail without billing if the query would bill more than 5 GB (accepts KB/MB/GB/TB, base 1024)
+gmp bq query -t ga4-events-flat --project my-project --dataset analytics_123456789 -r 2024-01-01..2024-01-31 --max-bytes 5GB
+```
+
+The cost line (`# processed 1.20 GB (1288490188 bytes)`, or `# dry-run: would process ...`) goes to **stderr**, so stdout stays clean JSON/CSV.
+
 ### Available Templates
 
 | Template | Service | Description |

@@ -49,15 +49,68 @@ export function parseDateRange(range: string): { start: string; end: string } {
 
 type Bigquery = ReturnType<typeof google.bigquery>;
 
+export interface BqCostOptions {
+  /** Só valida a query e estima o custo; não executa nem cobra. */
+  dryRun?: boolean;
+  /** Teto de bytes faturáveis; a query falha sem cobrar se passar disso. */
+  maxBytes?: number;
+}
+
+export interface BqQueryResult {
+  fields: string[];
+  rows: Record<string, string>[];
+  totalRows?: string;
+  /** Bytes que a query processa (dry-run: estimativa; senão: o que foi lido). */
+  bytesProcessed?: number;
+  cacheHit?: boolean;
+}
+
+/** Converte `--max-bytes` em inteiro positivo; aceita sufixos KB/MB/GB/TB (base 1024). */
+export function parseMaxBytes(input: string): number {
+  const m = /^\s*(\d+(?:\.\d+)?)\s*(b|kb|mb|gb|tb)?\s*$/i.exec(input);
+  if (!m) throw new Error(`Invalid --max-bytes: "${input}" (use e.g. 500000000, 500MB, 1GB)`);
+  const unit = { b: 1, kb: 1024, mb: 1024 ** 2, gb: 1024 ** 3, tb: 1024 ** 4 }[(m[2] ?? "b").toLowerCase() as "b"];
+  const bytes = Math.floor(Number(m[1]) * unit);
+  if (!Number.isSafeInteger(bytes) || bytes <= 0) throw new Error(`Invalid --max-bytes: "${input}"`);
+  return bytes;
+}
+
+export function formatBytes(bytes: number): string {
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let v = bytes;
+  let i = 0;
+  while (v >= 1024 && i < units.length - 1) {
+    v /= 1024;
+    i++;
+  }
+  return `${i === 0 ? v : v.toFixed(2)} ${units[i]}`;
+}
+
 export async function runBqQuery(
   bigquery: Bigquery,
   projectId: string,
-  sql: string
-): Promise<{ fields: string[]; rows: Record<string, string>[]; totalRows?: string }> {
+  sql: string,
+  cost: BqCostOptions = {}
+): Promise<BqQueryResult> {
   const first = await bigquery.jobs.query({
     projectId,
-    requestBody: { query: sql, useLegacySql: false, maxResults: 10000 },
+    requestBody: {
+      query: sql,
+      useLegacySql: false,
+      maxResults: 10000,
+      ...(cost.dryRun ? { dryRun: true } : {}),
+      // int64 na API do BigQuery é string.
+      ...(cost.maxBytes ? { maximumBytesBilled: String(cost.maxBytes) } : {}),
+    },
   });
+
+  const bytesRaw = first.data.totalBytesProcessed;
+  const bytesProcessed = bytesRaw != null ? Number(bytesRaw) : undefined;
+  const cacheHit = first.data.cacheHit ?? undefined;
+
+  if (cost.dryRun) {
+    return { fields: [], rows: [], bytesProcessed, cacheHit };
+  }
 
   const fields = (first.data.schema?.fields || []).map((f) => f.name || "");
   const toRows = (cellRows: { f?: { v?: unknown }[] }[] | undefined): Record<string, string>[] =>
@@ -80,5 +133,13 @@ export async function runBqQuery(
     pageToken = page.data.pageToken ?? undefined;
   }
 
-  return { fields, rows, totalRows: first.data.totalRows ?? undefined };
+  return { fields, rows, totalRows: first.data.totalRows ?? undefined, bytesProcessed, cacheHit };
+}
+
+/** Linha de custo para stderr (stdout fica só com o resultado, parseável). */
+export function costSummary(r: BqQueryResult, opts: BqCostOptions): string | undefined {
+  if (r.bytesProcessed == null) return undefined;
+  const prefix = opts.dryRun ? "# dry-run: would process" : "# processed";
+  const cache = r.cacheHit ? " (cache hit)" : "";
+  return `${prefix} ${formatBytes(r.bytesProcessed)} (${r.bytesProcessed} bytes)${cache}`;
 }
